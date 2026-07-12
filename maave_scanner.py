@@ -7,41 +7,42 @@ class MaaveScanner:
 
     def __init__(self, database_path, genai_client):
 
-        # Load OCR reader
-         if self.reader is None:
-            self.reader = easyocr.Reader(["en"])
+    # OCR reader will be loaded only when needed
+        self.reader = None
 
-        # Load ingredient database
+    # Load ingredient database
         self.maave_knowledge_base = pd.read_excel(database_path)
         self.maave_knowledge_base.columns = (
             self.maave_knowledge_base.columns.str.strip()
-        )
+    )
 
-        # Standardize ingredient names
+    # Standardize ingredient names
         self.maave_knowledge_base["ingredient_name"] = (
             self.maave_knowledge_base["ingredient_name"]
             .astype(str)
             .str.lower()
             .str.strip()
-        )
+    )
 
-        # Gemini client
+    # Gemini client
         self.client = genai_client
-
     # ---------------------------------------------------------
     # OCR
     # ---------------------------------------------------------
 
     def extract_text(self, image_path):
 
+    # Load EasyOCR only once
+        if self.reader is None:
+            self.reader = easyocr.Reader(["en"])
+
         results = self.reader.readtext(image_path)
 
         text = " ".join(
-            [result[1] for result in results]
-        )
+            result[1] for result in results
+    )
 
         return text
-
     # ---------------------------------------------------------
     # CLEAN OCR TEXT
     # ---------------------------------------------------------
