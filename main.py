@@ -90,7 +90,7 @@ async def scan_product(
 
         with tempfile.NamedTemporaryFile(
             delete=False,
-            suffix=".jpg
+            suffix= ".jpg"
         ) as temp:
 
             shutil.copyfileobj(
