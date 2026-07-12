@@ -42,10 +42,15 @@ DATABASE_PATH = os.path.join(
     "maave_ingredient_database.xlsx"
 )
 
-scanner = MaaveScanner(
-    database_path=DATABASE_PATH,
-    genai_client=client
-)
+scanner = None
+
+global scanner
+
+if scanner is None:
+    scanner = MaaveScanner(
+        DATABASE_PATH,
+        client
+    )
 
 # -------------------------------------------------
 # Home Endpoint
@@ -85,15 +90,15 @@ async def scan_product(
 
         with tempfile.NamedTemporaryFile(
             delete=False,
-            suffix=suffix
-        ) as temp_file:
+            suffix=".jpg
+        ) as temp:
 
             shutil.copyfileobj(
                 file.file,
-                temp_file
+                temp
             )
 
-            image_path = temp_file.name
+            image_path = temp.name
 
         raw_text = scanner.extract_text(image_path)
 
