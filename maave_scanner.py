@@ -8,7 +8,8 @@ class MaaveScanner:
     def __init__(self, database_path, genai_client):
 
         # Load OCR reader
-        self.reader = easyocr.Reader(["en"])
+         if self.reader is None:
+            self.reader = easyocr.Reader(["en"])
 
         # Load ingredient database
         self.maave_knowledge_base = pd.read_excel(database_path)
