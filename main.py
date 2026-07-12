@@ -4,6 +4,7 @@ import tempfile
 import shutil
 import os
 from google import genai
+from maave_scanner import MaaveScanner
 
 # -------------------------------------------------
 # FastAPI App
