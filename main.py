@@ -27,9 +27,7 @@ if not GEMINI_API_KEY:
         "GEMINI_API_KEY environment variable is not set."
     )
 
-client = genai.Client(
-    api_key=GEMINI_API_KEY
-)
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 # -------------------------------------------------
 # Knowledge Base
@@ -42,15 +40,8 @@ DATABASE_PATH = os.path.join(
     "maave_ingredient_database.xlsx"
 )
 
+# Scanner will be created on the first request
 scanner = None
-
-global scanner
-
-if scanner is None:
-    scanner = MaaveScanner(
-        DATABASE_PATH,
-        client
-    )
 
 # -------------------------------------------------
 # Home Endpoint
@@ -80,17 +71,28 @@ def health():
 # -------------------------------------------------
 
 @app.post("/scan")
-async def scan_product(
-    file: UploadFile = File(...)
-):
+async def scan_product(file: UploadFile = File(...)):
+
+    global scanner
 
     try:
 
+        # Initialize scanner only once
+        if scanner is None:
+            scanner = MaaveScanner(
+                DATABASE_PATH,
+                client
+            )
+
+        # Use uploaded file extension if available
         suffix = os.path.splitext(file.filename)[1]
+
+        if suffix == "":
+            suffix = ".jpg"
 
         with tempfile.NamedTemporaryFile(
             delete=False,
-            suffix= ".jpg"
+            suffix=suffix
         ) as temp:
 
             shutil.copyfileobj(
@@ -121,6 +123,7 @@ async def scan_product(
             scan_results
         )
 
+        # Delete temporary file
         os.remove(image_path)
 
         return JSONResponse(
@@ -147,10 +150,13 @@ async def scan_product(
 
     except Exception as e:
 
+        # Remove temporary file if it exists
+        try:
+            os.remove(image_path)
+        except:
+            pass
+
         raise HTTPException(
-
             status_code=500,
-
             detail=str(e)
-
         )
